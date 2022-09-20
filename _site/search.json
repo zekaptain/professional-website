@@ -1,16 +1,16 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "professional-website",
-    "section": "",
-    "text": "To learn more about Quarto websites visit https://quarto.org/docs/websites."
-  },
-  {
     "objectID": "about.html",
     "href": "about.html",
-    "title": "About",
+    "title": "About me",
     "section": "",
-    "text": "About this site"
+    "text": "I am a PhD candidate at the University of Missouri studying evolutionary genetics under Dr. Libby King. My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, D. melanogaster. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, CUDA, Java, MATLAB, SQL and more."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Zoe F. Elkins",
+    "section": "",
+    "text": "To learn more about Quarto websites visit https://quarto.org/docs/websites."
   }
 ]
