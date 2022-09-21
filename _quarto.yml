@@ -9,9 +9,9 @@ website:
     background: primary
     search: true
     left:
-      - href: about.qmd
-        text: Home
       - href: index.qmd
+        text: Home
+      - href: about.qmd
         text: Presentations
 
 format:
