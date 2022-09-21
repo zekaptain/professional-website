@@ -3,8 +3,7 @@ project:
 
 website:
   reader-mode: true
-  twitter-card: 
-    creator: "@zf_elkins"
+  open-graph: true
   title: "Zoe F. Elkins"
   navbar:
     background: primary
