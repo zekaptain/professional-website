@@ -2,6 +2,9 @@ project:
   type: website
 
 website:
+  reader-mode: true
+  twitter-card: 
+    creator: "@zf_elkins"
   title: "Zoe F. Elkins"
   navbar:
     background: primary
