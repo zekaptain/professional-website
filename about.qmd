@@ -1,5 +1,15 @@
 ---
 title: "About me"
+about:
+  template: jolla
+  image: meonarock.jpg
+  links:
+    - icon: twitter
+      text: Twitter
+      href: https://twitter.com/zf_elkins
+    - icon: github
+      text: GitHub
+      href: https://github.com/zekaptain
 ---
 
 I am a PhD candidate at the University of Missouri studying evolutionary genetics under Dr. Libby King. My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, D. melanogaster. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, CUDA, Java, MATLAB, SQL and more.
