@@ -17,8 +17,8 @@ I am a PhD candidate at the University of Missouri studying evolutionary genetic
 ## Education
 
 University of Missouri-Columbia | Columbia, MO 
-PhD in Biological Sciences | Aug 2016 - Present
+PhD in Biological Sciences      | Aug 2016 - Present
 
-Drake University | Des Moines, IA 
-B.S. in Computer Science | Aug 2012 - May 2016
-B.S. in Psychology | Aug 2012 - May 2016
+Drake University                | Des Moines, IA 
+B.S. in Computer Science        | Aug 2012 - May 2016
+B.S. in Psychology              | Aug 2012 - May 2016
