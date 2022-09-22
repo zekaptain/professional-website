@@ -18,7 +18,7 @@ website:
         href: "mailto:zfelkins@proton.me"
   title: "Zoe F. Elkins"
   navbar:
-    background: primary
+    background: '#d9534f'
     search: true
     left:
       - text: "Home"
