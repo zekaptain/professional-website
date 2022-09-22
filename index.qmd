@@ -10,7 +10,7 @@ about:
     - icon: github
       text: GitHub
       href: https://github.com/zekaptain
-    - icon: email
+    - icon: envelope-fill
       text: Email
       href: "mailto:zfelkins@proton.me"
 ---

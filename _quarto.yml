@@ -13,7 +13,7 @@ website:
       - icon: twitter
         text: Twitter
         href: https://twitter.com/zf_elkins
-      - icon: email
+      - icon: envelope-fill
         text: Email
         href: "mailto:zfelkins@proton.me"
   title: "Zoe F. Elkins"
