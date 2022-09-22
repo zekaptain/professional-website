@@ -16,6 +16,8 @@ website:
         file: about.qmd
       - text: "Projects"
         file: projects.qmd
+      - text: "Contact"
+        file: contact.qmd
   sidebar:
     - title: "Presentations"
     - title: "Projects"
