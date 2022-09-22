@@ -26,7 +26,7 @@ website:
       - text: "Presentations"
         file: about.qmd
       - text: "Projects"
-        file: projects.qmd
+        file: exp_bx.qmd
       - text: "Contact"
         file: contact.qmd
   sidebar:
@@ -35,7 +35,9 @@ website:
       style: "docked"
       background: light
       contents:
-        - projects.qmd
+        - exp_bx.qmd
+        - sr.qmd
+        - model.qmd
     - title: "Contact"
 format:
   html:

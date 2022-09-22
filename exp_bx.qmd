@@ -1,0 +1,21 @@
+---
+title: "Exploration behavior"
+format:
+  html:
+    fig-width: 8
+    fig-height: 4
+    code-fold: true
+---
+
+## Allelic frequency differences
+
+Allelic frequency differences between flies that exhibit exploration behavior and flies that don't.
+
+```{r}
+#| label: fig-allele-diffs
+#| fig-cap: Allele differences between exploring and non-exploring flies. 
+#| warning: false
+
+library(ggplot2)
+
+```
