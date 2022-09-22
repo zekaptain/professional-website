@@ -4,16 +4,26 @@ project:
 website:
   reader-mode: true
   open-graph: true
+  page-navigation: true
   title: "Zoe F. Elkins"
   navbar:
     background: primary
     search: true
     left:
-      - href: index.qmd
-        text: Home
-      - href: about.qmd
-        text: Presentations
-
+      - text: "Home"
+        file: index.qmd
+      - text: "Presentations"
+        file: about.qmd
+      - text: "Projects"
+        file: projects.qmd
+  sidebar:
+    - title: "Presentations"
+    - title: "Projects"
+      style: "docked"
+      background: light
+      contents:
+        - projects.qmd
+    - title: "Contact"
 format:
   html:
     theme: cosmo
