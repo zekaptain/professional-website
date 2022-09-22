@@ -5,6 +5,17 @@ website:
   reader-mode: true
   open-graph: true
   page-navigation: true
+  page-footer:
+    right: 
+      - icon: github
+        text: GitHub
+        href: https://github.com/zekaptain
+      - icon: twitter
+        text: Twitter
+        href: https://twitter.com/zf_elkins
+      - icon: email
+        text: Email
+        href: "mailto:zfelkins@proton.me"
   title: "Zoe F. Elkins"
   navbar:
     background: primary
