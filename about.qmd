@@ -1,3 +1,23 @@
 ---
 title: "Selected presentations"
 ---
+
+| **The genetic basis and evolution of complex traits in *Drosophila melanogaster***
+| *Z. Elkins*
+| Life Sciences Fellowship Talk
+| 2021
+
+| **Dietary impact on starvation resistance in an evolved multiparent population of *D. melanogaster***
+| *Z. Elkins, J. Moaton, E. King*
+| Poster presentation -- The Allied Genetics Conference
+| 2020
+
+| **Escaping the warming climate: from penguins to fruit flies**
+| *Z. Elkins*
+| Public lecture - Daniel Boone Regional Library
+| 2019
+
+| **The genetic basis of exploration behavior in a multiparent population of *D. melanogaster***
+| *Z. Elkins, A. Rahman, L. Storks, E. King*
+| Population, Evolution and Quantitative Genetics Conference
+| 2018

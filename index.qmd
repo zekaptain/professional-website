@@ -12,7 +12,7 @@ about:
       href: https://github.com/zekaptain
 ---
 
-I am a PhD candidate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org). My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, CUDA, Java, MATLAB, SQL and more.
+I am a PhD candidate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org). My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, Java, MATLAB, SQL and more. I also have experience in parallel computing via bash scripting and CUDA.
 
 ------------------------------------------------------------------------
 
