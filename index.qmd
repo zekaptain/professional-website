@@ -2,7 +2,7 @@
 title: "Zoe F. Elkins"
 about:
   template: trestles
-  image: meonarock.jpg
+  image: meincle.png
   links:
     - icon: twitter
       text: Twitter
