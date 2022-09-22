@@ -16,6 +16,6 @@ Allelic frequency differences between flies that exhibit exploration behavior an
 #| fig-cap: Allele differences between exploring and non-exploring flies. 
 #| warning: false
 
+
 library(ggplot2)
-library(cowplot)
 ```
