@@ -17,5 +17,5 @@ Allelic frequency differences between flies that exhibit exploration behavior an
 #| warning: false
 
 library(ggplot2)
-
+library(cowplot)
 ```
