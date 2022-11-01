@@ -18,4 +18,26 @@ Allelic frequency differences between flies that exhibit exploration behavior an
 
 
 library(ggplot2)
+library(tidyverse)
+set.seed(172452)
+
+expl_freqs <- readRDS('expl-freqs.Rds')
+arm <- expl_freqs %>% 
+  filter(chrom=='2L') %>% 
+  slice(1:800)
+
+D <- (sample(400:600,800,replace = TRUE))/1000
+N <- (sample(300:600,800, replace = TRUE))/1000
+
+sampledata <- tibble(
+  "pos" = arm$pos,
+  "N" = N,
+  "D" = D
+)
+
+plt <- ggplot(data=sampledata, aes(pos/16)) + 
+  geom_line(aes(y = N, colour = "non-explorers")) +
+  geom_line(aes(y = D, colour = "explorers"))
+plt + labs(x = "Position (Mb)")
+
 ```
