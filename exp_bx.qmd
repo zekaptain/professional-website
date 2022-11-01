@@ -16,9 +16,9 @@ Allelic frequency differences between flies that exhibit exploration behavior an
 #| fig-cap: Allele differences between exploring and non-exploring flies. 
 #| warning: false
 
-
-library(ggplot2,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
-library(tidyverse,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
+# lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2"
+library(ggplot2)
+library(tidyverse)
 set.seed(172452)
 
 expl_freqs <- readRDS('expl-freqs.Rds')
