@@ -11,10 +11,10 @@ format:
 
 ```{r}
 # load dependencies
-library(ggplot2)
-library(tidyverse)
-library(purrr)
-library(cowplot)
+library(ggplot2,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
+library(tidyverse,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
+library(purrr,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
+library(cowplot,lib.loc = "C:/Users/zekef/AppData/Local/R/win-library/4.2")
 set.seed(172452)
 ```
 
