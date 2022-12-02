@@ -2,7 +2,7 @@
 title: "Zoe F. Elkins"
 about:
   template: trestles
-  image: meincle.png
+  image: headshot.png
   links:
     - icon: twitter
       text: Twitter
