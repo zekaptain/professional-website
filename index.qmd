@@ -2,7 +2,7 @@
 title: "Zoe F. Elkins, Ph.D."
 about:
   template: trestles
-  image: meincle.png
+  image: headshot.png
   links:
     - icon: twitter
       text: Twitter
