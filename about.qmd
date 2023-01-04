@@ -14,7 +14,7 @@ title: "Selected presentations & publications"
 | *Z. Elkins, J. Moaton, E.G. King*
 | In preparation
 
-| **Identifying splice sites of messenger RNA using support vector machines**
+| [**Identifying splice sites of messenger RNA using support vector machines**](MICS_2016_paper_18.pdf)
 | *P. Diamond, Z. Elkins, K. Huff, L. Naylor, S. Schoeberle, S. White, T. Urness, M. Zwier*
 | Midwest Instruction and Computing Symposium
 | 2016
