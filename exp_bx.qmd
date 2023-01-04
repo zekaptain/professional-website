@@ -7,9 +7,22 @@ format:
     code-fold: true
 ---
 
+## *Drosophila* Synthetic Population Resource
+
+![](defense_presentation_docs/images/DSPR.jpg){fig-align="center"}
+
+^1,2^
+
+## Bulk-segregant analysis population
+
+![](defense_presentation_docs/images/dspr_basepop.png)
+"Exploring" flies are those found in the B chamber after 6 hours. "Non-exploring" flies are those found in the A chamber after 6 hours. 
+
+![](defense_presentation_docs/images/replicatepopbsa.png){fig-align="center"}
+
 ## Allelic frequency differences
 
-Allelic frequency differences between flies that exhibit exploration behavior and flies that don't.
+Simulated allelic frequency differences between flies that exhibit exploration behavior and flies that don't.
 
 ```{r}
 #| label: fig-allele-diffs
@@ -41,3 +54,7 @@ plt <- ggplot(data=sampledata, aes(pos/16)) +
 plt + labs(x = "Position (Mb)")
 
 ```
+
+::: footer
+^1^ King et al., 2012a,b; ^2^ Long et al., 2014
+:::

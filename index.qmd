@@ -1,5 +1,5 @@
 ---
-title: "Zoe F. Elkins"
+title: "Zoe F. Elkins, Ph.D."
 about:
   template: trestles
   image: meincle.png
@@ -18,7 +18,7 @@ about:
       href: "tel:573-319-8822"
 ---
 
-I am a PhD candidate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org). My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, Java, MATLAB, SQL and more. I also have experience in parallel computing via bash scripting and CUDA.
+I received my doctorate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org) in December 2022. My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, Java, MATLAB, SQL and more. I also have experience in parallel computing via bash scripting and CUDA.
 
 ------------------------------------------------------------------------
 

@@ -1,0 +1,1198 @@
+---
+title: "The evolution and genetic basis of complex traits in *D. melanogaster*"
+author: "Z. Forrest Elkins"
+date: today
+date-format: long
+institute: "University of Missouri - Columbia"
+format: 
+  revealjs:
+    incremental: true
+    slide-number: c/t
+    scrollable: true
+editor: source
+---
+
+::: {.r-stack}
+![](images/polarbear.jpg){.fragment}
+
+![](images/Gryllus-cricket.jpg){.fragment}
+
+![](images/domiculaballooning.jpg){.fragment}
+
+![](images/Yellow-spotted-salamander.jpg){.fragment}
+:::
+
+---
+
+## Complex traits {.smaller}
+
+:::: {.columns}
+
+::: {.column width="30%"}
+- Not a single gene with two alleles
+- Poly- or omni-genic
+  - many genes of small effect
+- Continuous phenotypic data
+:::
+
+::: {.column width="70%"}
+```{r}
+#| fig-cap: A quantitative, complex trait -- polar bear weight
+#| warning: false
+
+library(ggplot2)
+library(tidyverse)
+library(cowplot)
+wt <- tibble(
+  weight = round(c(rnorm(200, mean=400, sd=100), rnorm(200, mean=600, sd=100)))
+)
+ggplot(wt, aes(x=weight)) +
+  geom_histogram(binwidth=20) +
+  labs(x = "Weight (kg)", y = "Count") +
+  theme_cowplot() +
+  theme(text = element_text(size=40))
+  
+```
+:::
+
+::::
+
+## Genetic basis
+
+```{r,output=FALSE}
+library(lattice)
+manhattan.plot<-function(chr, pos, pvalue, 
+	sig.level=NA, annotate=NULL, ann.default=list(),
+	should.thin=T, thin.pos.places=2, thin.logp.places=2, 
+	xlab="Chromosome", ylab=expression(-log[10](p-value)),
+	col=c("gray","darkgray"), panel.extra=NULL, pch=20, cex=0.8,...) {
+
+	if (length(chr)==0) stop("chromosome vector is empty")
+	if (length(pos)==0) stop("position vector is empty")
+	if (length(pvalue)==0) stop("pvalue vector is empty")
+
+	#make sure we have an ordered factor
+	if(!is.ordered(chr)) {
+		chr <- ordered(chr)
+	} else {
+		chr <- chr[,drop=T]
+	}
+
+	#make sure positions are in kbp
+	if (any(pos>1e6)) pos<-pos/1e6;
+
+	#calculate absolute genomic position
+	#from relative chromosomal positions
+	posmin <- tapply(pos,chr, min);
+	posmax <- tapply(pos,chr, max);
+	posshift <- head(c(0,cumsum(posmax)),-1);
+	names(posshift) <- levels(chr)
+	genpos <- pos + posshift[chr];
+	getGenPos<-function(cchr, cpos) {
+		p<-posshift[as.character(cchr)]+cpos
+		return(p)
+	}
+
+	#parse annotations
+	grp <- NULL
+	ann.settings <- list()
+	label.default<-list(x="peak",y="peak",adj=NULL, pos=3, offset=0.5, 
+		col=NULL, fontface=NULL, fontsize=NULL, show=F)
+	parse.label<-function(rawval, groupname) {
+		r<-list(text=groupname)
+		if(is.logical(rawval)) {
+			if(!rawval) {r$show <- F}
+		} else if (is.character(rawval) || is.expression(rawval)) {
+			if(nchar(rawval)>=1) {
+				r$text <- rawval
+			}
+		} else if (is.list(rawval)) {
+			r <- modifyList(r, rawval)
+		}
+		return(r)
+	}
+
+	if(!is.null(annotate)) {
+		if (is.list(annotate)) {
+			grp <- annotate[[1]]
+		} else {
+			grp <- annotate
+		} 
+		if (!is.factor(grp)) {
+			grp <- factor(grp)
+		}
+	} else {
+		grp <- factor(rep(1, times=length(pvalue)))
+	}
+  
+	ann.settings<-vector("list", length(levels(grp)))
+	ann.settings[[1]]<-list(pch=pch, col=col, cex=cex, fill=col, label=label.default)
+
+	if (length(ann.settings)>1) { 
+		lcols<-trellis.par.get("superpose.symbol")$col 
+		lfills<-trellis.par.get("superpose.symbol")$fill
+		for(i in 2:length(levels(grp))) {
+			ann.settings[[i]]<-list(pch=pch, 
+				col=lcols[(i-2) %% length(lcols) +1 ], 
+				fill=lfills[(i-2) %% length(lfills) +1 ], 
+				cex=cex, label=label.default);
+			ann.settings[[i]]$label$show <- T
+		}
+		names(ann.settings)<-levels(grp)
+	}
+	for(i in 1:length(ann.settings)) {
+		if (i>1) {ann.settings[[i]] <- modifyList(ann.settings[[i]], ann.default)}
+		ann.settings[[i]]$label <- modifyList(ann.settings[[i]]$label, 
+			parse.label(ann.settings[[i]]$label, levels(grp)[i]))
+	}
+	if(is.list(annotate) && length(annotate)>1) {
+		user.cols <- 2:length(annotate)
+		ann.cols <- c()
+		if(!is.null(names(annotate[-1])) && all(names(annotate[-1])!="")) {
+			ann.cols<-match(names(annotate)[-1], names(ann.settings))
+		} else {
+			ann.cols<-user.cols-1
+		}
+		for(i in seq_along(user.cols)) {
+			if(!is.null(annotate[[user.cols[i]]]$label)) {
+				annotate[[user.cols[i]]]$label<-parse.label(annotate[[user.cols[i]]]$label, 
+					levels(grp)[ann.cols[i]])
+			}
+			ann.settings[[ann.cols[i]]]<-modifyList(ann.settings[[ann.cols[i]]], 
+				annotate[[user.cols[i]]])
+		}
+	}
+ 	rm(annotate)
+
+	#reduce number of points plotted
+	if(should.thin) {
+		thinned <- unique(data.frame(
+			logp=round(-log10(pvalue),thin.logp.places), 
+			pos=round(genpos,thin.pos.places), 
+			chr=chr,
+			grp=grp)
+		)
+		logp <- thinned$logp
+		genpos <- thinned$pos
+		chr <- thinned$chr
+		grp <- thinned$grp
+		rm(thinned)
+	} else {
+		logp <- -log10(pvalue)
+	}
+	rm(pos, pvalue)
+	gc()
+
+	#custom axis to print chromosome names
+	axis.chr <- function(side,...) {
+		if(side=="bottom") {
+			panel.axis(side=side, outside=T,
+				at=((posmax+posmin)/2+posshift),
+				labels=levels(chr), 
+				ticks=F, rot=0,
+				check.overlap=F
+			)
+		} else if (side=="top" || side=="right") {
+			panel.axis(side=side, draw.labels=F, ticks=F);
+		}
+		else {
+			axis.default(side=side,...);
+		}
+	 }
+
+	#make sure the y-lim covers the range (plus a bit more to look nice)
+	prepanel.chr<-function(x,y,...) { 
+		A<-list();
+		maxy<-ceiling(max(y, ifelse(!is.na(sig.level), -log10(sig.level), 0)))+.5;
+		A$ylim=c(0,maxy);
+		A;
+	}
+
+	xyplot(logp~genpos, chr=chr, groups=grp,
+		axis=axis.chr, ann.settings=ann.settings, 
+		prepanel=prepanel.chr, scales=list(axs="i"),
+		panel=function(x, y, ..., getgenpos) {
+			if(!is.na(sig.level)) {
+				#add significance line (if requested)
+				panel.abline(h=-log10(sig.level), lty=2,col="#000000");
+			}
+			panel.superpose(x, y, ..., getgenpos=getgenpos);
+			if(!is.null(panel.extra)) {
+				panel.extra(x,y, getgenpos, ...)
+			}
+		},
+		panel.groups = function(x,y,..., subscripts, group.number) {
+			A<-list(...)
+			#allow for different annotation settings
+			gs <- ann.settings[[group.number]]
+			A$col.symbol <- gs$col[(as.numeric(chr[subscripts])-1) %% length(gs$col) + 1]    
+			A$cex <- gs$cex[(as.numeric(chr[subscripts])-1) %% length(gs$cex) + 1]
+			A$pch <- gs$pch[(as.numeric(chr[subscripts])-1) %% length(gs$pch) + 1]
+			A$fill <- gs$fill[(as.numeric(chr[subscripts])-1) %% length(gs$fill) + 1]
+			A$x <- x
+			A$y <- y
+			do.call("panel.xyplot", A)
+			#draw labels (if requested)
+			if(gs$label$show) {
+				gt<-gs$label
+				names(gt)[which(names(gt)=="text")]<-"labels"
+				gt$show<-NULL
+				if(is.character(gt$x) | is.character(gt$y)) {
+					peak = which.max(y)
+					center = mean(range(x))
+					if (is.character(gt$x)) {
+						if(gt$x=="peak") {gt$x<-x[peak]}
+						if(gt$x=="center") {gt$x<-center}
+					}
+					if (is.character(gt$y)) {
+						if(gt$y=="peak") {gt$y<-y[peak]}
+					}
+				}
+				if(is.list(gt$x)) {
+					gt$x<-A$getgenpos(gt$x[[1]],gt$x[[2]])
+				}
+				do.call("panel.text", gt)
+			}
+		},
+		xlab=xlab, ylab=ylab, 
+		panel.extra=panel.extra, getgenpos=getGenPos, ...
+	);
+}
+```
+
+```{r, output = FALSE}
+library(lattice)
+#FAKE SAMPLE DATA
+createSampleGwasData<-function(chr.count=10, include.X=F) {
+	chr<-c(); pos<-c()
+	for(i in 1:chr.count) {
+		chr <- c(chr,rep(i, 1000))
+		pos <- c(pos,ceiling(runif(1000)*(chr.count-i+1)*25*1e3))
+	}
+	if(include.X) {
+		chr <- c(chr,rep("X", 1000))
+		pos <- c(pos,ceiling(runif(1000)*5*25*1e3))
+	}
+	pvalue <- runif(length(pos))
+	return(data.frame(chr, pos,pvalue))
+}
+```
+
+```{r}
+#| fig-cap: Sample genome-wide association study (GWAS) with simulated data
+#| warning: false
+
+#create sample data
+dd<-createSampleGwasData()
+#make annotation factor
+ann<-rep(1, length(dd$pvalue))
+ann[with(dd, chr==1 & pos>=90e3 & pos<110e3)]<-2
+ann[with(dd, chr==4 & pos>=50e3 & pos<80e3)]<-3
+ann[with(dd, chr==6 & pos>=30e3 & pos<50e3)]<-4
+ann<-factor(ann, levels=1:4, labels=c("","GENE1","GENE2", "GENE3"))
+#draw plot with annotation
+manhattan.plot(dd$chr, dd$pos, dd$pvalue, annotate=ann,sig.level=0.05)
+
+```
+
+::: footer
+Code adapted from [Genome Analysis Wiki](https://genome.sph.umich.edu/wiki/Code_Sample:_Generating_Manhattan_Plots_in_R)
+:::
+
+## Experimental evolution
+
+- Artificially select for some phenotype
+  - Offspring of parents with desired phenotype are mated to seed next generation
+- After >1 generations, the population phenotype will be vastly different
+- The genotype of organisms with the desired phenotype will be vastly different than ancestor genotype
+
+## Artificial selection
+
+```{r}
+allele.freq<-0.5   
+L <- 1000
+environ.var<-1
+sel<-0.1
+Num_inds=10000
+
+##MAKE A MUM
+## For each mother, at each locus we draw an allele (either 0 or 1) from the population allele frequency. 
+##We do this twice for each mother two represent the two haplotypes in the mother 
+mum.hap.1<-replicate(Num_inds, rbinom(L,1,allele.freq) )
+mum.hap.2<-replicate(Num_inds, rbinom(L,1,allele.freq) )
+##type mum.hap.1[,1] to see the 1st mothers 1st haplotype
+
+##Each mothers genotype at each locus is either 0,1,2
+mum.geno<-mum.hap.1+mum.hap.2
+
+additive.genetic<-colSums(mum.geno)
+mean.genetic<-mean(additive.genetic)
+genetic.var<-sd(additive.genetic)
+
+additive.genetic<-additive.genetic / sd(additive.genetic)
+mum.pheno<- additive.genetic + rnorm(Num_inds,sd=sqrt(environ.var))
+mum.pheno<-mum.pheno-mean(mum.pheno)
+
+
+
+###FAMILIES
+
+
+##MAKE A DAD (same code as make a mum, only said in a deeper voice)
+dad.hap.1<-replicate(Num_inds, rbinom(L,1,allele.freq) )
+dad.hap.2<-replicate(Num_inds, rbinom(L,1,allele.freq) )
+dad.geno<-dad.hap.1+dad.hap.2
+
+
+additive.genetic<-colSums(dad.geno)
+additive.genetic<-additive.genetic / sd(additive.genetic)
+dad.pheno<- additive.genetic + rnorm(Num_inds,sd=sqrt(environ.var))
+dad.pheno<-dad.pheno-mean(dad.pheno)
+
+### Make a child
+child.geno<-dad.hap.1+mum.hap.1 ##1/2 from mum 1/2 from dad
+
+additive.genetic<-colSums(child.geno)
+additive.genetic<-additive.genetic / sd(additive.genetic)
+child.pheno<- additive.genetic + rnorm(Num_inds,sd=sqrt(environ.var))
+child.pheno<-child.pheno-mean(child.pheno)
+
+
+
+##Selection of top sel% of individuals
+
+top.sel.per.mums<- mum.pheno>quantile(mum.pheno,p=1-sel) 
+top.sel.per.dads<- dad.pheno>quantile(dad.pheno,p=1-sel)
+
+
+child.geno<-dad.hap.1[,top.sel.per.dads]+mum.hap.1[,top.sel.per.mums] ##1/2 from mum 1/2 from dad
+
+additive.genetic<-(colSums(child.geno)-mean.genetic)
+additive.genetic<-additive.genetic/genetic.var
+child.pheno<- additive.genetic + rnorm(length(child.geno),sd=sqrt(environ.var))
+
+my.lim<-quantile(c(mum.pheno,dad.pheno),p=c(0.01,0.99))
+my.lim[2]<-quantile(child.pheno,p=c(0.99))
+
+hist(c(mum.pheno,dad.pheno),breaks=100,xlim=my.lim,xlab="Phenotype",main=paste("Phenotype distribution before selection"),cex.axis=1.5,cex.lab=1.5,cex.main=1.5); 
+abline(v=0,col="blue",lwd=3)
+
+par.mean<-mean(c(mum.pheno[top.sel.per.mums],dad.pheno[top.sel.per.dads]))
+hist(c(mum.pheno[top.sel.per.mums],dad.pheno[top.sel.per.dads]),breaks=100,xlim=my.lim,xlab="Phenotype",main="Phenotype distribution after selection",cex.axis=1.5,cex.lab=1.5,cex.main=1.5); 
+abline(v= par.mean,col="red",lwd=3)
+abline(v=0,col="blue",lwd=3)
+
+
+hist(child.pheno,xlim=my.lim,breaks=100,xlab="Phenotype",main="Phenotype distribution in the offspring",cex.axis=1.5,cex.lab=1.5,cex.main=1.5); 
+abline(v=0,col="blue",lwd=3)
+abline(v= mean(child.pheno),col="red",lwd=3)
+
+```
+
+::: footer
+Code adapted from Dr. Graham Coop's [Population Genetics & Quantitative Genetics notes](https://github.com/cooplab/popgen-notes)
+:::
+
+## Evolve and resequence
+
+- Sequence ancestor DNA
+- Artificially select for _n_ generations
+- Resequence organisms from the *n*th generation
+- Compare genetic differences between ancestor and *n*th generation
+
+## Bulk segregant analysis
+
+- Artificially select for opposing phenotypes (denoted as 'high' and 'low') in as low as 1 generation
+- Sequence 'high' bulks and 'low' bulks
+  - Bulk = pooled genetic sample
+- Compare genetic differences between bulks
+
+## Overview
+
+::: {.fragment .fade-in}
+Genetic basis of exploration tendency in a multiparent population of *D. melanogaster*
+:::
+
+|
+|
+
+::: {.fragment .fade-in}
+::: {.fragment .semi-fade-out}
+Phenotypic differences in starvation resistance between selection lines of an experimentally evolved population of *D. melanogaster*
+:::
+:::
+
+# Exploration tendency
+
+## Dispersal and exploration {.smaller}
+
+:::: {.columns}
+
+::: {.column width="50%"}
+- Dispersal -- complex trait
+  * Any movement with potential to lead to gene flow
+  
+  
+- Exploration -- complex trait
+  * Sub-phenotype of dispersal
+  * Moving from known environment to unknown environment
+:::
+
+::: {.column width="50%"}
+![](images/flydistribution1.jpg)
+:::
+
+::::
+
+## *Drosophila* exploration
+- *D. melanogaster* can get all the resources they need from a piece of vegetable rot
+- What causes a fly to leave its current environment for a novel environment?
+  - Costly investment
+  - Trade-off with other traits like reproduction & lipid storage
+
+## Main questions
+
+Is exploration a heritable trait?
+  ~ I.e., how large a genetic component contributes to variation in exploration within the population?
+  
+If so, what on the genetic level contributes to exploration in *Drosophila*?
+  ~ What are the differences in genetic architecture between exploring and non-exploring flies?
+
+## Heritability background
+
+Heritability
+  ~  The degree of variation in a phenotypic trait in a population due to genetic variation in the population
+
+Broad-sense heritability
+  ~ Total genetic variability over total phenotypic variability
+  ~ Cannot calculate narrow-sense heritability in the DSPR due to lack of family data
+
+## *Drosophila* Synthetic Population Resource
+
+![](images/DSPR.jpg){fig-align="center"}
+
+
+::: footer
+^1^ King et al., 2012a,b; ^2^ Long et al., 2014
+:::
+
+## Heritability experimental setup
+
+![](images/heritability.png){fig-align="center"}
+
+## Heritability results
+
+``` {=tex}
+\begin{gather*}
+H^2 = V_G / V_P = 0.4
+\end{gather*}
+```
+
+![](images/heritability_results.png){fig-align="center"}
+
+## Main questions
+
+Is exploration a heritable trait?
+  ~ I.e., how large a genetic component contributes to variation in exploration within the population?
+  
+If so, what on the genetic level contributes to exploration in *Drosophila*?
+  ~ What are the differences in genetic architecture between exploring and non-exploring flies?
+
+
+## Bulk-segregant analysis population
+![](images/dspr_basepop.png)
+
+## Bulk-segregant analysis population
+![](images/replicatepopbsa.png){fig-align="center"}
+
+## G' statistic
+
+::: {.nonincremental}
+
+- Stochasticity in sequence coverage
+- Variation in allele frequency estimates due to organism sampling during the formation of the bulks
+- Null hypothesis: no QTL, i.e., allele is equally expected in both bulks 
+
+:::
+
+![](images/allelefreqcvg.png){fig-align="center"}
+
+::: footer
+^1^ Magwene et al., 2011
+:::
+
+# Results
+
+---
+
+![](images/gprimefig.png){fig-align="center"}
+---
+
+## Randomization significance testing
+
+- Markov chain Monte Carlo (MCMC) method 
+  - Resampling algorithm
+
+![](images/labelswitch.png)
+
+## G' statistic
+
+```{r}
+#| fig-cap: Simulated G' value comparison for null (no QTL) and significant (QTL present)
+#| warning: false
+
+library(ggplot2)
+library(tidyverse)
+library(cowplot)
+nullhyp <- rnorm(1000,mean=1.16,sd=0.17)
+#sighyp <- rnorm(1000,mean=2.34,sd=.5)
+simg <- tibble(
+  gprime = nullhyp,
+  ID = c(rep("Null",1000))
+)
+ggplot(simg, aes(x=gprime)) +
+  geom_histogram(binwidth=0.1,alpha=0.8,fill = "#d3d3d3") +
+  geom_vline(xintercept=1.46,color="#ff7f50",size=1) +
+  labs(x = "G'", y = "Count") +
+  theme_cowplot() +
+  theme(text = element_text(size=20))
+  
+```
+
+---
+
+![](images/gprimefig.png){fig-align="center"}
+---
+
+```{r}
+#| fig-cap: Allele frequencies of explorers (E) and non-explorers (NE) at significant G' QTL locations
+
+library(tidyverse)
+library(reshape2)
+library(tictoc)
+library(stringr)
+library(cowplot)
+
+meanfreqs <- readRDS(file='data/meanfreqs.RDS')
+
+##### PLOTS 2L
+### ONE
+arm <- "2L"
+sigpos <- 17054316
+sigrow <- which(meanfreqs$pos == sigpos)
+plotfreqs <- meanfreqs %>% 
+  filter(chrom==arm) %>% 
+  slice((sigrow-30):(sigrow+30))
+
+p1 <- ggplot(data = plotfreqs, aes(pos/16)) +
+  geom_line(aes(y = N, colour = "non-explorers")) +
+  geom_line(aes(y = D, colour = "explorers")) +
+  geom_point(x=17054316/16,y=0,colour="red") +
+  geom_point(x=17054384/16,y=0,colour="red") +
+  labs(x="Position (Mb)", y = "Allele frequencies",title="Chromosome 2L") +
+  theme(axis.text.x = element_text(angle=60, hjust=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        text = element_text(size=20)) + 
+  annotate("rect", fill = "black", alpha = 0.2, 
+             xmin = (sigpos-200)/16, xmax = (sigpos+300)/16,
+             ymin = -Inf, ymax = Inf)
+
+p1 
+```
+
+---
+
+```{r}
+#| fig-cap: Allele frequencies of explorers (E) and non-explorers (NE) at significant G' QTL locations
+
+
+
+##### PLOTS X
+### ONE
+sigpos <- 10174752
+sigrow <- which(meanfreqs$pos == sigpos)
+plotfreqs <- meanfreqs %>% 
+  slice((sigrow-30):(sigrow+30))
+
+p8 <- ggplot(data = plotfreqs, aes(pos/16)) +
+  geom_line(aes(y = N, colour = "non-explorers")) +
+  geom_line(aes(y = D, colour = "explorers")) +
+  geom_point(x=sigpos/16,y=0,colour="red") +
+  geom_point(x=10174756/16,y=0,colour="red") +
+  labs(x="Position (Mb)", y = "Allele frequencies",title="Chromosome X") +
+  theme(axis.text.x = element_text(angle=60, hjust=1),
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black"),
+        text = element_text(size=20)) + 
+  annotate("rect", fill = "black", alpha = 0.2, 
+           xmin = (sigpos-200)/16, xmax = (sigpos+200)/16,
+           ymin = -Inf, ymax = Inf)
+
+p8
+```
+
+---
+
+## {.smaller}
+
+| **Chromosome** | **Position** | **Gene**       | **Associated phenotype**                                       |
+|----------------|--------------|----------------|----------------------------------------------------------------|
+| 2L             | 17054316, 17054384     | _CG15136_      | Abnormal flight                                      |
+|                | 18515161     | _Ugt201D1_     | Enables UDP-glycosyltransferase activity                       |
+|                |              | _CG10211_      | Involved in response to oxidative stress                       |
+| 3L             | 6818526      | _vvl_          | Specification of cell fates, patterning and immune defense     |
+|                | 12226612     | _app_          | Regulation of fat signaling, abnormal locomotive behavior      |
+|                | 14401683, 14401693, 14401703     | _Dscam2_       | Abnormal neuroanatomy, size, body color    |
+| 3R             | 25454633     | _Men_          | Abnormal heat stress response, abnormal sleep                  |
+|                | 27194130     | _G14369_, _CG14370_       | Little to no information                            |
+| X              | 10174752, 10174756 | _CG32767_ | Expressed in wing hinge primordium and wing pouch             |
+|                | 12446014     | _Btnd_         | Flightless, abnormal heat stress response                      |
+|                |              | _Efr_          | Manifests in wing vein                                         |
+|                |              | _sqh_          | Involved in cytokinesis and tissue morphogenesis               |
+|                |              | _dtn_          | Abnormal heat stress response                                  |
+
+
+---
+
+![](images/LD.png){fig-align="center"}
+
+---
+
+## Conclusions
+
+- Exploration behavior is a heritable trait
+- Implicated QTL involved in stress & flight traits
+- Established a novel method of allele frequency estimation in a bulk-segregant experimental paradigm
+
+## Overview
+::: {.fragment .fade-in}
+::: {.fragment .semi-fade-out}
+Genetic basis of exploration tendency in a multiparent population of *D. melanogaster*
+:::
+:::
+
+|
+|
+
+::: {.fragment .fade-in}
+Phenotypic differences in starvation resistance between selection lines of an experimentally evolved population of *D. melanogaster*
+:::
+
+# Starvation resistance
+
+## Starvation resistance {.smaller}
+- Adaptation that confers resistance to environmental stressor
+  - 'Hunker down' tactic
+
+:::: {.columns}
+
+::: {.column width="50%"}
+![](images/happybear.jpg)
+:::
+
+::: {.column width="50%"}
+![](images/sadpolarbear.jpg)
+:::
+
+::::
+
+## Starvation resistance
+
+::: {.nonincremental}
+
+- Correlated with higher lipid storage
+  - More body lipid, higher starvation resistance[^1]^,^[^2]
+- Evolved quicker in female _D. simulans_ than males^2^
+  - 5 generations vs. 15 generations
+- Alters feeding behavior in _D. melanogaster_[^3]
+
+:::
+
+[^1]: Harshman 1998 
+[^2]: Ballard et al. 2008 
+[^3]: Brown et al. 2019
+
+
+## Experimental evolution population
+![](images/dspr_basepop1.png)
+
+## Selection experiment {.smaller}
+:::: {.columns}
+
+::: {.column width="70%"}
+
+Three selection lines:
+
+::: {.nonincremental}
+
+1. Fluctuating availability (FA)
+2. Deteriorating availability (DA)
+3. Constant high availability (CHA)
+
+:::
+
+:::
+
+::: {.column width="30%"}
+
+Three diets:
+
+::: {.nonincremental}
+
+1. Control (C)
+2. Dietary restrictive (DR)
+3. High sugar (HS)
+
+:::
+
+:::
+
+::::
+
+| Selection     | Days post-oviposition      
+|-------|--------|---------|---------|
+|               | _8 - 13_ | _14 - 17_ | _18 - 21_ |
+| **FA**        | C      | DR      | C       |
+| **DA**        | C      | C       | DR      |
+| **CH**        | HS     | HS      | HS      |
+| Eclosure: Day 10 <br /> Egg collection: Day 21
+
+## Main questions
+
+Does starvation resistance co-evolve with resource allocation strategies in _D. melanogaster_?
+  ~ I.e., are certain selection lines more resistant to starvation than others? 
+
+Is starvation resistance phenotypically plastic?
+  ~ I.e., can the same genotype give rise to various phenotypes depending on the environment?
+
+
+## Direct measurement assay
+![](images/sr_figure_dm.png){fig-align="center"}
+
+## Survival analysis
+
+- Survival data
+  - Time-to-event
+  - Clear start and end time
+- Time-to-death
+  - Start: placed onto nutritionless agar
+  - End: time of death
+
+## Censoring survival data
+
+- 'Censoring' occurs if a subject doesn't experience the event by the end of the experiment
+- Flies that die due to other factors
+  - Ex.: crushed by vial plug
+- Still provide valuable information
+  - Survival analysis appropriately accounts for this
+
+## Survivor analysis and censoring
+
+$$Y_i = min(T_i,C_i)$$
+
+::: {.nonincremental}
+
+- $Y_i$: observed time
+- $T_i$: event time
+- $C_i$: censoring time
+
+:::
+
+::: aside
+Clark et al., 2003
+:::
+
+
+## Kaplan-Meier survival curves
+
+The **Kaplan-Meier** estimate is the _product_ of the survival probabilities:
+
+$$\prod_{i=0}^n S(t) $$
+Where we estimate survival probability as the number of flies alive at the current time, divided by the number of flies alive at the previous time.
+
+::: aside
+Rich et al., 2010
+:::
+
+---
+
+![](images/dm_surv_sex.png){fig-align="center"}
+
+---
+
+![](images/dm_surv_sel.png){fig-align="center"}
+
+## Cox proportional hazard model {.smaller}
+
+| **Characteristic** | **HR^1^**  | **95% CI^2^**  | **p-value** |
+|--------------------|------------|----------------|-------------|
+| Selection          |            |                |             |
+| _CH_               | ---        | ---            |             |
+| _DA_               | 1.73       | 1.30, 2.31     | <0.0001     |
+| _FA_               | 1.41       | 1.05, 1.88     | .022        |
+| Sex                |            |                |             |
+| _F_                | ---        |                |             |
+| _M_                | 1.90       | 1.50, 2.42     | <0.001      |
+| ^1^ HR = Hazard Ratio; ^2^ CI = Confidence Interval
+
+## AICc model comparison
+
+::: {.nonincremental}
+Top performing Cox proportional hazard model:
+:::
+
+$$Selection + Sex + Batch,$$
+$$\Delta AIC = 0.00$$ 
+
+::: {.nonincremental}
+Second-best  Cox proportional hazard model:
+:::
+
+$$Selection + Sex,$$
+
+$$\Delta AIC = 2.31$$
+
+::: aside
+Akaike 1974; Mazerolle 2020
+:::
+
+## Main questions
+
+Does starvation resistance co-evolve with resource allocation strategies in _D. melanogaster_?
+  ~ I.e., are certain selection lines more resistant to starvation than others? 
+
+Is starvation resistance phenotypically plastic?
+  ~ I.e., can the same genotype give rise to various phenotypes depending on the environment?
+
+## Diet treatment assay
+![](images/sr_figure_dt.png){fig-align="center"}
+
+---
+
+![](images/dt_risk_sex.png){fig-align="center"}
+
+The risk (1 - survival probability) of death between males and females
+
+---
+
+![](images/dt_cumhaz_diet.png){fig-align="center"}
+
+The cumulative hazard (-log (survival probability)) over time for flies from our three diet treatments.
+
+---
+
+```{r}
+#| warning: false
+
+library(tidyverse)
+library(ggplot2)
+library(ggsurvfit)
+library(survminer)
+library(survival)
+library(dplyr)
+trans_sr_data <- readRDS(file="data/sr_data.RDS")
+#### plot using ggsurvfit package, survfit2 function
+testHS <- trans_sr_data %>% 
+  filter(diet == 'HS', Sex == "F")
+
+surv_object <- Surv(time = testHS$srtime, event = testHS$srstat)
+
+
+hs <- survfit2(formula=surv_object ~ diet + selID, data = testHS) %>% 
+  ggsurvfit(linetype_aes = TRUE, size = 1, 
+            theme = list(theme_classic(),
+                         theme(legend.position = c(0.8,0.8)))) +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+hs <- hs + theme(text = element_text(size=20))
+```
+
+
+```{r}
+#| warning: false
+
+library(tidyverse)
+library(ggplot2)
+library(ggsurvfit)
+library(survminer)
+library(survival)
+library(dplyr)
+trans_sr_data <- readRDS(file="data/sr_data.RDS")
+#### plot using ggsurvfit package, survfit2 function
+testDR <- trans_sr_data %>% 
+  filter(diet == 'DR', Sex == "F")
+
+surv_object <- Surv(time = testDR$srtime, event = testDR$srstat)
+
+
+dr <- survfit2(formula=surv_object ~ diet + selID, data = testDR) %>% 
+  ggsurvfit(linetype_aes = TRUE, size = 1,
+            theme = list(theme_classic(), 
+                         theme(legend.position = c(0.8,0.75)))) +
+  labs(
+    x = element_blank(),
+    y = element_blank()
+  )
+dr <- dr + theme(text = element_text(size=20))
+```
+
+
+```{r}
+#| warning: false
+
+library(tidyverse)
+library(ggplot2)
+library(ggsurvfit)
+library(survminer)
+library(survival)
+library(dplyr)
+trans_sr_data <- readRDS(file="data/sr_data.RDS")
+#### plot using ggsurvfit package, survfit2 function
+testC <- trans_sr_data %>% 
+  filter(diet == 'C', Sex == "F")
+
+surv_object <- Surv(time = testC$srtime, event = testC$srstat)
+
+
+co <- survfit2(formula=surv_object ~ diet + selID, data = testC) %>% 
+  ggsurvfit(linetype_aes = TRUE, size = 1,
+            theme = list(theme_classic(),
+                         theme(legend.position = c(0.8,0.7)))) +
+  labs(
+    x = "Hours",
+    y = element_blank()
+  )
+co <- co + theme(text = element_text(size=20))
+```
+
+
+```{r}
+#| fig-cap: Survival probability in female flies predicted by diet and selection line
+#| warning: false
+
+library(patchwork)
+
+lab <- ggplot(data.frame(l = "Overall survival probability", x = 1, y = 1)) +
+      geom_text(aes(x, y, label = l), angle = 90,size=6) + 
+      theme_void() +
+      coord_cartesian(clip = "off")
+
+lab + (hs / dr / co) + plot_layout(widths = c(1.5, 50))
+```
+
+## Cox proportional hazard model {.smaller}
+
+| **Characteristic** | **HR^1^**  | **95% CI^2^**  | **p-value** |
+|--------------------|------------|----------------|-------------|
+| Diet               |            |                |             |
+| _C_                | ---        | ---            |             |
+| _DR_               | 0.72       | 0.54, 0.96     | 0.027       |
+| _HS_               | 0.49       | 0.37, 0.67     | <0.001      |
+| Selection          |            |                |             |
+| _CH_               | ---        | ---            |             |
+| _DA_               | 1.16       | 0.87, 1.54     | 0.3         |
+| _FA_               | 1.27       | 0.94, 1.70     | 0.12        |
+| Sex                |            |                |             |
+| _F_                | ---        |                |             |
+| _M_                | 3.34       | 2.52, 4.43     | <0.001      |
+| ^1^ HR = Hazard Ratio; ^2^ CI = Confidence Interval
+
+## AICc model comparison
+
+::: {.nonincremental}
+Top performing Cox proportional hazard model:
+:::
+
+$$Diet + Selection + Sex,$$
+
+
+$$\Delta AIC = 0.00$$
+
+::: {.nonincremental}
+
+Second-best Cox proportional hazard model:
+
+:::
+
+$$Diet*Selection + Sex,$$
+
+$$\Delta AIC = 2.96$$
+
+::: aside
+Akaike 1974; Mazerolle 2020
+:::
+
+## Conclusions {.smaller}
+
+- CHA & FA selection lines confer higher SR resistance
+  - 'Thrifty' spending vs. abundance of riches
+- Both CHA selection line and HS diet groups resisted starvation for a significantly longer period of time
+  - Flies from CH selection line on DR diet treatment had worse SR
+- In direct measurement flies, we saw significant differences in SR for the selection groups in both KM and Cox
+- In diet treatment flies, selection by itself was not a significant predictor, while diet was
+  - Diet + Selection, and Diet * Selection, however, were significant in our Cox model
+  
+
+## Summary {.smaller}
+- Adaptations to environmental stress
+  - 'Leaving'
+  - 'Hunkering down'
+- Identified candidate genes underlying exploration tendency
+  - Some genes involved with other environmental stress traits 
+- Observed the co-evolution of starvation resistance alongside resource allocation strategies
+  - Resource allocation strategies confer various levels of SR
+  - An organism's environmental upbringing impacts SR
+  - Eating sugar is good for you!
+  
+## Acknowledgements {.smaller}
+
+:::: {.columns}
+
+::: {.column width="60%"}
+
+::: {.nonincremental}
+
+| The King Lab, past and present
+|   Dr. Libby King
+
+| My committee
+|   Dr. Lauren Sullivan
+|   Dr. Rex Cocroft
+|   Dr. Greg Blomquist
+
+| My friends & family
+|   Dr. Arianne Messerman
+|   Mom, Dad, Liv, Sam & Haley
+|   Jo Moaton
+
+
+:::
+
+:::
+
+::: {.column width="40%"}
+
+::: {.nonincremental}
+| Funding
+|   Life Sciences Fellowship
+|   NIH
+
+DNA Core
+
+Special thank you to Debbie Allen, Rebecca Ballew, Nila Emmerich, Melody Kroll, the IT office and the RSS group.
+:::
+
+:::
+
+::::
+
+::: aside
+This work was supported by the University of Missouri, the Life Sciences Fellowship, and by NIH grant R01 GM117135 to E.G.K. We would also like to thank the DNA core for their sequencing work, and Elizabeth Jones for all of her help. 
+:::
+
+![](images/all_logos.png){.absolute bottom=100 right=0 width="250"}
+
+# Extra slides
+
+## Different approaches {.smaller} 
+DROP THIS SLIDE, put in extra slides -- put 'main questions' slide here again
+- **QTL mapping**
+  - Requires family information
+  - Maps linkage genes
+  - Identification of QTL underlying a phenotype via analysis of polygenic inheritance
+- **Genome-wide association study**
+  - Requires phenotyping of hundreds of RILs 
+  - Whole-genome sequencing data
+  - Associates small changes in polygenic SNP frequencies with phenotype
+- **Bulk-segregant analysis** 
+  - Allows for rapid testing of extreme phenotypes
+  - Need genetic variation for extreme selection to act on
+
+## Survival probability
+The probability that a fly will survive past a given time, i.e., **survival probability**: 
+
+$$S(t) = Pr(T > t) = 1 - F(t),$$
+$$F(t) = Pr(T \le t)$$
+
+## Statistical error in BSA-seq
+
+```{r}
+#| echo: TRUE
+#| code-line-numbers: "|2" 
+
+estAF <- function(cvg,trueAF){
+  est <- rbinom(1,cvg,trueAF) / cvg
+  return(est)
+}
+```
+
+- Function calculating estimated allele frequency
+- Takes in coverage and 'true' allele frequency
+- Outputs estimated allele frequency 
+
+---
+
+```{.r code-line-numbers="|3|4|5"}
+
+# run this n times, scale up 
+n <- 1000
+tru <- 0.43
+cvg <- sample(2:150,n,replace = TRUE)
+af <- tibble(
+  "cvg" = cvg,
+  "trueAF" = rep(tru,times=n)
+)
+
+```
+
+
+```{r}
+#| warning: false
+#| fig-cap: Variability in allele frequency estimations due to coverage.
+
+
+# run this n times, scale up 
+n <- 1000
+tru <- 0.43
+cvg <- sample(2:150,n,replace = TRUE)
+af <- tibble(
+  "cvg" = cvg,
+  "trueAF" = rep(tru,times=n)
+)
+
+af$estAF <- af %>% pmap(estAF) %>% unlist()
+
+# plot estimated allele frequency by coverage
+plt <- af %>% ggplot(aes(x = estAF, y = cvg)) +
+  geom_point(alpha = 0.15,colour="red") +
+  geom_smooth(method = "gam", colour = "red", se=FALSE) +
+  geom_vline(xintercept=tru, size = 0.8,linetype = "dashed") +
+  labs(x = "Estimated allele frequency", y = "Coverage") +
+  annotate("label",x = tru, y = -50, label = "True allele frequency") +
+  theme_cowplot()
+plt
+```
+
+## Significance thresholds 
+
+::: {.nonincremental}
+
+- False discovery rate (FDR)
+  - Expected proportion of false "discoveries," i.e., Type I error
+- Family-wise error rate (FWER)
+  - Probability of making >= 1 false "discoveries"
+  - Stricter than FDR
+
+:::
+
+| Null hypothesis is... | TRUE         | FALSE         |
+|-----------------------|--------------|---------------|
+| **Rejected**          | _Type I error_ | Correct       |
+| **Accepted**          | Correct      | _Type II error_ |

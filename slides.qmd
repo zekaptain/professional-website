@@ -1,0 +1,8 @@
+---
+title: "Dissertation slides"
+slide-format: revealjs
+---
+
+```{=html}
+<iframe class="slide-deck" src=defense_presentation_docs"></iframe>
+```

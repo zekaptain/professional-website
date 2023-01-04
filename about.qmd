@@ -1,8 +1,25 @@
 ---
-title: "Selected presentations"
+title: "Selected presentations & publications"
 ---
 
 ------------------------------------------------------------------------
+
+## Publications
+
+| **The genetic basis of exploration behavior in a multiparent population of *D. melanogaster***
+| *Z. Elkins, A. Rahman, L. Storks, E.G. King*
+| In preparation
+
+| **Starvation resistance in an evolved multiparent population of *D. melanogaster***
+| *Z. Elkins, J. Moaton, E.G. King*
+| In preparation
+
+| **Identifying splice sites of messenger RNA using support vector machines**
+| *P. Diamond, Z. Elkins, K. Huff, L. Naylor, S. Schoeberle, S. White, T. Urness, M. Zwier*
+| Midwest Instruction and Computing Symposium
+| 2016
+
+## Presentations
 
 | **The genetic basis and evolution of complex traits in *Drosophila melanogaster***
 | *Z. Elkins*
