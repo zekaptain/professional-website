@@ -4,5 +4,5 @@ slide-format: revealjs
 ---
 
 ```{=html}
-<iframe class="slide-deck" src="defense_presentation_docs/defense_quartopres.html"></iframe>
+<iframe class="slide-deck" src="defense_presentation_docs/defense_quartopres.html" width="90%"></iframe>
 ```
