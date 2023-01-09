@@ -29,6 +29,8 @@ website:
         file: exp_bx.qmd
       - text: "Dissertation slides"
         file: slides.qmd
+      - text: "CV"
+        file: cv.qmd
   sidebar:
     - title: "Presentations"
     - title: "Projects"

@@ -1,0 +1,7 @@
+---
+title: "My CV"
+---
+
+```{=html}
+<iframe src={`${Zoe_Elkins_CV.pdf}#view=fitH`} title="Zoe_Elkins_CV.pdf" height="100%" width="100%" />
+```
