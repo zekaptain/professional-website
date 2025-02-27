@@ -9,10 +9,10 @@ format:
 
 ## Experimental evolution
 
-- Artificially select for some phenotype
-  - Offspring of parents with desired phenotype are mated to seed next generation
-- After >1 generations, the population phenotype will be vastly different
-- The genotype of organisms with the desired phenotype will be vastly different than ancestor genotype
+-   Artificially select for some phenotype
+    -   Offspring of parents with desired phenotype are mated to seed next generation
+-   After \>1 generations, the population phenotype will be vastly different
+-   The genotype of organisms with the desired phenotype will be vastly different than ancestor genotype
 
 ## Artificial selection
 
@@ -99,13 +99,11 @@ abline(v= mean(child.pheno),col="red",lwd=3)
 
 ## Evolve and resequence
 
-- Sequence ancestor DNA
-- Artificially select for _n_ generations
-- Resequence organisms from the *n*th generation
-- Compare genetic differences between ancestor and *n*th generation
+-   Sequence ancestor DNA
+-   Artificially select for *n* generations
+-   Resequence organisms from the *n*th generation
+-   Compare genetic differences between ancestor and *n*th generation
 
 ::: footer
 Code adapted from Dr. Graham Coop's [Population Genetics & Quantitative Genetics notes](https://github.com/cooplab/popgen-notes)
 :::
-
-

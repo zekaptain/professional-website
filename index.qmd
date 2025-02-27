@@ -4,9 +4,9 @@ about:
   template: trestles
   image: headshot.png
   links:
-    - icon: twitter
-      text: Twitter
-      href: https://twitter.com/zf_elkins
+    - icon: linkedin
+      text: LinkedIn
+      href: https://linkedin.com/in/zforrestelkins
     - icon: github
       text: GitHub
       href: https://github.com/zekaptain
@@ -18,9 +18,19 @@ about:
       href: "tel:573-319-8822"
 ---
 
-I received my doctorate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org) in December 2022. My research focuses on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, Java, MATLAB, SQL and more. I also have experience in parallel computing via bash scripting and CUDA.
+## Industry Experience
+
+My most recent role as a Jr. Data Scientist at Veda Data Solutions allowed me to expand my skillset. During my tenure there, I gained valuable experience analyzing geo-location data from ESRI ARCGIS and Smarty, building out databases in SQL, and developing full-stack KPI dashboard microsites for internal stakeholders.
+
+## Doctoral Research
+
+I received my doctorate at the University of Missouri studying evolutionary genetics under [Dr. Libby King](https://elizabethking.org) in December 2022. My research focused on the genetics of dispersal and starvation resistance in the common fruit fly, *D. melanogaster*. I develop and utilize open-source statistical pipelines to analyze and visualize large datasets of genomic data. I primarily code in R & python, and I have experience in several languages, including C++, Java, MATLAB, SQL and more. I also have experience in parallel computing via bash scripting and CUDA.
 
 ------------------------------------------------------------------------
+
+## Previous Employment
+
+| Jr. Data Scientist at Veda Data Solutions \| Apr 2023 - Feb 2025
 
 ## Education
 
